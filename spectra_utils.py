@@ -8,6 +8,7 @@ import scipy.fft
 import spectrum
 import os
 
+import aggregate_utils
 import plotting_utils
 
 def get_next_pow2(n):
@@ -169,6 +170,90 @@ def get_spectra_periodogram_int_cycles(ts, step, n, fps, freqmin, freqmax, windo
         freq, pxx = get_spectra_periodogram(ts, fps, freqmin, freqmax, nfft=len(ts_trim), 
                                             window=window, detrend=detrend, verbose=False)
 
+        pxx_avg = aggregate_utils.average_spectra(pxx)
+        
+        idx, mag, prom = find_dominant_peak(pxx_avg)
+
+        if verbose:
+            print(f'Peak Magnitude: {mag}')
+
+        if mag > mag_max:
+            mag_max = mag
+            pxx_max = pxx
+            freq_max = freq
+            i_max = i
+
+        if plot:
+            plotting_utils.plot_spectrum(freq, pxx, peak_idx=idx)
+            plt.show()
+
+    if verbose:
+        print(f'Best spectrum when i = {i_max}')
+
+    return freq_max, pxx_max
+
+def get_spectrum_periodogram_int_cycles(ts, step, n, fps, freqmin, freqmax, window='boxcar', 
+                                        detrend='constant', verbose=False, plot=False):
+    
+    ''' 
+    Iteratively trims the input and computes the power spectral density using the periodogram.
+
+    Attempts to compute the power spectral density for an interger number of cycles by iteratively
+    trimming the input and computing the power spectral density with the periodogram (of length
+    equal to the trimmed input). Returns spectrum whose corresponding average spectrum's peak frequency
+    has the greatest magnitude.
+    
+    Parameters
+    ----------
+    ts : arraylike (1d, 2d, or 3d)
+        Time series with axis 0 equal to time axis.
+    step: int
+        Number of frames to remove from beginggin
+        during each iteration
+    n : int
+        number of trimming iterations
+    fps : float
+        Frame rate of video in frames per second.
+    freqmin : float
+        Lower bound for frequency thresholding in Hz.
+    freqmax : float
+        Upper bound for frequency thresholding in Hz.
+    Window : string
+        Window to apply to time series prior to fft.
+    detrend : string
+        See scipy.signal.periodogram for details.
+    verbose : boolean
+        Print progress statements when true.
+    plot : boolean
+        Plots average spectrum of each iteration when true
+
+    Returns
+    -------
+    freq : 1d array 
+        Frequency range (bins), bounded by freqmin and freqmax.
+    pxx : array, (1d, 2d, or 3d)
+        Array containing the bin magnitudes for each of the input signals.
+        (for frequencies between freqmin and freqmax)
+    '''
+    freq_max = None
+    pxx_max = None
+    mag_max = -1
+    i_max = 0
+
+    if verbose:
+        print('Iteratively computing spectrum for trimmed time series')
+        print(f'Step size: {step}')
+        print(f'Number of iteratoins: {n}')
+
+    for i in range(n):
+        if verbose:
+            print(f'i = {i}')
+
+        ts_trim = ts[i * step:]
+
+        freq, pxx = get_spectra_periodogram(ts, fps, freqmin, freqmax, nfft=len(ts_trim), 
+                                            window=window, detrend=detrend, verbose=False)
+        
         idx, mag, prom = find_dominant_peak(pxx)
 
         if verbose:
@@ -190,7 +275,6 @@ def get_spectra_periodogram_int_cycles(ts, step, n, fps, freqmin, freqmax, windo
         print(f'Best spectrum when i = {i_max}')
 
     return freq_max, pxx_max
-
 
 def get_spectra_welch(ts, 
                       fs, 
