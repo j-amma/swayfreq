@@ -1,0 +1,13 @@
+name: swayfreq
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - numpy
+  - scipy
+  - pandas
+  - ffmpeg
+  - matplotlib
+  - spectrum
+  - opencv
+  - notebook
