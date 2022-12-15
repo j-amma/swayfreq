@@ -185,7 +185,7 @@ def plot_freq_histogram(dom_freq, freq, ax=None, title='Dominant Frequency Histo
     peak_label_xpad = bin_width
     ax.text(bins[argmax] + peak_label_xpad, 
             n[argmax], 
-            f'\n Peak Frequency: {bins[argmax]:.3f} Hz')
+            f'\n Peak Frequency: {bins[argmax]:.2f} Hz')
     ax.scatter(bins[argmax], n[argmax], marker='.', color='k', s=50)
     ax.set_ylim(top=1.1 * ax.get_ylim()[1])
 
