@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
-
 import numpy as np
 import subprocess as sp
 import signal
@@ -13,10 +10,6 @@ FFMPEG = "ffmpeg"
 BUFFER_SIZE = 10**8
 
 FFPROBE = 'ffprobe'
-
-# ffprobe IMG_9499.MOV  2>&1 | grep Stream | grep Video | awk '{ print $11 }'
-# ffprobe -v quiet -print_format json -show_format -show_streams filename
-# json.loads(encoded_hand)
 
 class VideoReader(object):
     """docstring for VideoReader"""
@@ -39,6 +32,7 @@ class VideoReader(object):
                     '-f', 'image2pipe',
                     '-pix_fmt', 'rgb24',
                     '-vcodec', 'rawvideo', '-']
+        
         # note: stdout pipes the data we want
         # stderr captures the status updates ffmpeg would print to the screen
         # stdin prevents ffmpeg from capturing keyboard input.
