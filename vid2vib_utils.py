@@ -2,6 +2,8 @@ import cv2
 import math
 import numpy as np
 import sys
+import datetime
+import ffmpeg
 import VideoReader
 
 CHANNEL_MIN = 0
@@ -14,6 +16,35 @@ def get_frame(path):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     vid_capture.release()
     return frame
+
+def get_video_datetime(path):
+    '''
+    Extracts datetime from video metadata
+    '''
+    vr = VideoReader.VideoReader(path)
+    metadata = vr.get_metadata()
+    
+    datetime_str = metadata['tags']['creation_time']
+    datetime_str = ' '.join(datetime_str.split('.')[0].split('T'))
+    
+    dt = datetime.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+    
+    return dt
+
+def get_video_datetime(filename):
+    """ Given a gopro.mp4 filename, return its start time as a datetime objects
+    
+    Written by Austin
+    """
+    try: 
+        probe = ffmpeg.probe(filename)
+        datetime_str = probe['streams'][0]['tags']['creation_time']
+        datetime_str = ' '.join(datetime_str.split('.')[0].split('T'))
+        dt = datetime.datetime.strptime(datetime_str, '%Y-%m-%d %H:%M:%S')
+        return dt
+    except ffmpeg.Error as e: 
+        print(e.stderr.decode('utf8'))
+        raise e
 
 def uncompressed_vid(path, roi, reduction='gray', verbose=True, edge=False, edge_kwargs={'threshold1':200, 'threshold2':400}):
         ''' Reads video roi into an array.
@@ -39,7 +70,7 @@ def uncompressed_vid(path, roi, reduction='gray', verbose=True, edge=False, edge
         
         ymin, ymax, xmin, xmax = roi
         
-        # initialize output array
+        # initialize output
         fps = get_fps(vid)
         num_frame = int(vid.metadata.get('nb_frames'))
         outputdata = np.zeros((num_frame, ymax-ymin, xmax-xmin))
@@ -119,7 +150,6 @@ def mbt(vid_path, roi, reduction='gray', nlevels=8, thresh_min=CHANNEL_MIN, thre
     # iterate over all frames
     for i, frame in enumerate(vid_roi):
 
-        
         # append number of pixels with intensity below level to appropriate time series
         for j, level in enumerate(levels):
             vibs[i, j] = (np.ravel(frame) < level).sum()
