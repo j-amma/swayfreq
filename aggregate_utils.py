@@ -2,7 +2,6 @@
 
 import numpy as np
 import numpy.ma as ma
-import pandas as pd
 import scipy.stats
 
 def average_spectra(pxx):
@@ -51,6 +50,7 @@ def hist_spectrum(dom_freq, freq, masked=True):
         histogram bins
     '''
     data = dom_freq.compressed().ravel() if masked else dom_freq.ravel()
+    freq = np.append(freq, freq[-1] + (freq[1] - freq[0]))
     count, bins = np.histogram(data, bins=freq, density=True)
     return count, bins[:-1]
 

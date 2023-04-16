@@ -25,7 +25,7 @@ class Vid2Vib:
         f2 = int(fps[1])
         return math.floor(f1 / f2)
     
-    def mlt(self, roi, reduction='gray', nlevels=8, thresh_min=vid2vib_utils.CHANNEL_MIN, thresh_max=vid2vib_utils.CHANNEL_MAX, verbose=True):
+    def mbt(self, roi, reduction='gray', nlevels=8, thresh_min=vid2vib_utils.CHANNEL_MIN, thresh_max=vid2vib_utils.CHANNEL_MAX, verbose=True):
         ''' Uses multilevel binary thresholding to generate nlevels vibration signals.
         
         Generates nlevel vibration signals using nlevel thresholds evenly spaced between

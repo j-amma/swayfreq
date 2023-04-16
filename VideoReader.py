@@ -1,18 +1,16 @@
-#!/usr/bin/env python
-# coding: utf-8
+'''Class for reading videos into arrays using FFMPEG'''
 
 import numpy as np
 import subprocess as sp
 import signal
 import json
 
-FFMPEG = "ffmpeg"
+FFMPEG = 'ffmpeg'
 BUFFER_SIZE = 10**8
-
 FFPROBE = 'ffprobe'
 
 class VideoReader(object):
-    """docstring for VideoReader"""
+    '''docstring for VideoReader'''
     command = None
     pipe = None
     resolution = None
@@ -41,11 +39,11 @@ class VideoReader(object):
 
 
         if (resolution is None):
-            resolution = [self.metadata["height"], self.metadata["width"], 3]
+            resolution = [self.metadata['height'], self.metadata['width'], 3]
 
         self.resolution = resolution
         
-        self.fps = self.metadata["avg_frame_rate"]
+        self.fps = self.metadata['avg_frame_rate']
 
         self.npixels = resolution[0]*resolution[1]*resolution[2]
 
@@ -63,6 +61,7 @@ class VideoReader(object):
                     '-show_format',
                     '-show_streams',
                     self.filename]
+        
         # note: stdout pipes the data we want
         # stderr captures the status updates ffmpeg would print to the screen
         # stdin prevents ffmpeg from capturing keyboard input.
@@ -76,17 +75,14 @@ class VideoReader(object):
 
         self.metadata = self.get_video_stream(full_metadata)
 
-
     def get_video_stream(self, ffprobe_meta):
-
-        for s in ffprobe_meta["streams"]:
-            if s["codec_type"] == "video":
+        for s in ffprobe_meta['streams']:
+            if s['codec_type'] == 'video':
                 return s
-
         return None
 
     def __iter__(self):
-        """make the reader object iterable"""
+        '''make the reader object iterable'''
         return self
 
     def __next__(self):
@@ -106,7 +102,7 @@ class VideoReader(object):
 
 
     def close(self):
-        """docstring for close"""
+        '''docstring for close'''
         self.pipe.stdout.close()
         self.pipe.stderr.close()
         self.pipe.send_signal(signal.SIGINT)
@@ -114,10 +110,10 @@ class VideoReader(object):
 
 
 def main():
-    """Print purpose of library"""
-    print("This is a class for reading video sequences into python via ffmpeg. ")
-    print("Provides the 'Video_Reader' iterator class. ")
-    print("Requires ffmpeg be installed. ")
+    '''Print purpose of library'''
+    print('This is a class for reading video sequences into python via ffmpeg. ')
+    print('Provides the "Video_Reader" iterator class. ')
+    print('Requires ffmpeg be installed. ')
 
 if __name__ == '__main__':
     main()

@@ -55,7 +55,7 @@ def plot_grayscale_image(image, ax=None, title=None, edgecolor=None, colorbar=Tr
                 figsize=figsize)
     return ax
 
-def plot_truecolor_image(image, ax=None, title=None, edgecolor=None, no_ticks=True, figsize=None):
+def plot_truecolor_image(image, ax=None, title=None, edgecolor=None, no_ticks=True, colorbar=False, figsize=None):
     '''
     '''
     if ax is None:
@@ -67,21 +67,21 @@ def plot_truecolor_image(image, ax=None, title=None, edgecolor=None, no_ticks=Tr
                 cmap=None, 
                 edgecolor=edgecolor, 
                 gscale_image=False, 
-                colorbar=False, 
+                colorbar=colorbar, 
                 colorbarlabel=None, 
                 no_ticks=no_ticks, 
                 figsize=figsize)
 
     return ax
 
-def plot_frame(path, ax=None, title=None, figsize=None):
+def plot_frame(path, ax=None, title=None, no_ticks=False, figsize=None):
     '''
     '''
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
     
     frame = vid2vib_utils.get_frame(path)
-    plot_truecolor_image(frame, ax=ax, title=title, figsize=figsize)
+    plot_truecolor_image(frame, ax=ax, title=title, no_ticks=no_ticks, figsize=figsize)
 
     return ax
 
@@ -157,7 +157,7 @@ def plot_timeseries(signal, t=None, ax=None, title=None, color='k', ylabel='', x
     ax.set_ylabel(ylabel)
     ax.set_xlabel(xlabel)
 
-def plot_freq_histogram(dom_freq, freq, ax=None, title='Dominant Frequency Histogram', color='royalblue', figsize=None):
+def plot_freq_histogram(dom_freq, freq, ax=None, title='Dominant Frequency Histogram', label_peak=True, density=True, color='royalblue', figsize=None):
     ''' Plots histogram for frequency heat map
 
     Params:
@@ -173,21 +173,22 @@ def plot_freq_histogram(dom_freq, freq, ax=None, title='Dominant Frequency Histo
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
 
-    n, bins = np.histogram(dom_freq.ravel(), bins=freq, density=True)
+    n, bins = np.histogram(dom_freq.ravel(), bins=freq, density=density)
     ax.plot(bins[:-1], n, color=color)
 
     ax.set_title(title)
     ax.set_ylabel('Pixel Count')
     ax.set_xlabel('Frequency Bin (Hz)')
     
-    argmax = np.argmax(n)
-    bin_width = bins[1] - bins[0]
-    peak_label_xpad = bin_width
-    ax.text(bins[argmax] + peak_label_xpad, 
-            n[argmax], 
-            f'\n Peak Frequency: {bins[argmax]:.2f} Hz')
-    ax.scatter(bins[argmax], n[argmax], marker='.', color='k', s=50)
-    ax.set_ylim(top=1.1 * ax.get_ylim()[1])
+    if label_peak:
+        argmax = np.argmax(n)
+        bin_width = bins[1] - bins[0]
+        peak_label_xpad = bin_width
+        ax.text(bins[argmax] + peak_label_xpad, 
+                n[argmax], 
+                f'\n Peak Frequency: {bins[argmax]:.2f} Hz')
+        ax.scatter(bins[argmax], n[argmax], marker='.', color='k', s=50)
+        ax.set_ylim(top=1.1 * ax.get_ylim()[1])
 
 def plot_mbt_timeseries(levels, ts, axs=None, title='MBT Timeseries', figsize=None):
     '''Plots timeseries obtained from vid2vib_utils.mlt

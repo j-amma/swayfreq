@@ -1,11 +1,10 @@
-''' Module containing functions for generating and operating on vibration spectra.'''
+''' Module for generating and operating on vibration spectra.'''
 
 import numpy as np
 import numpy.ma as ma
-import matplotlib.pyplot as plt
 import scipy.signal
 import scipy.fft
-import spectrum
+import matplotlib.pyplot as plt
 import os
 
 import aggregate_utils
@@ -13,7 +12,7 @@ import plotting_utils
 
 def get_next_pow2(n):
     '''
-    Returns next power of 2 greater than or equal to a number
+    Returns next power of 2 greater than or equal to a number.
 
     Parameters
     ----------
@@ -28,13 +27,11 @@ def get_next_pow2(n):
     k = 1
     while k < n:
         k = k << 1
- 
     return k
-
 
 def normalize(f, dx):
     '''
-    Scales the input s.t. it has unit area.
+    Scales the input such that it has unit area.
 
     Parameters
     ----------
@@ -79,17 +76,17 @@ def get_spectra_periodogram(ts, fps, freqmin, freqmax, nfft=None, window='boxcar
 
     Returns
     -------
-    freq : 1d array 
+    freq : array, 1d
         Frequency range (bins), bounded by freqmin and freqmax.
     pxx : array, (1d, 2d, or 3d)
-        Array containing the bin magnitudes for each of the input signals. 
-        (for frequencies between freqmin and freqmax)
+        Array containing the bin magnitudes for each of the input signals 
+        (for frequencies between freqmin and freqmax).
     '''
     if verbose:
         print('Computing pixel spectra')
     
     if nfft is None:
-        nfft = get_next_pow2(ts.shape[0])
+        nfft = 8 * get_next_pow2(ts.shape[0])
     
     freq, pxx = scipy.signal.periodogram(ts, 
                                          fps, 
@@ -108,8 +105,16 @@ def get_spectra_periodogram(ts, fps, freqmin, freqmax, nfft=None, window='boxcar
     
     return freq, pxx
 
-def get_spectra_periodogram_int_cycles(ts, step, n, fps, freqmin, freqmax, window='boxcar', 
-                                        detrend='constant', verbose=False, plot=False):
+def get_spectra_periodogram_int_cycles(ts, 
+                                       step, 
+                                       n, 
+                                       fps, 
+                                       freqmin, 
+                                       freqmax, 
+                                       window='boxcar', 
+                                       detrend='constant', 
+                                       verbose=False, 
+                                       plot=False):
     
     ''' 
     Iteratively trims the input and computes the power spectral density using the periodogram.
@@ -124,10 +129,10 @@ def get_spectra_periodogram_int_cycles(ts, step, n, fps, freqmin, freqmax, windo
     ts : arraylike (1d, 2d, or 3d)
         Time series with axis 0 equal to time axis.
     step: int
-        Number of frames to remove from beginggin
-        during each iteration
+        Number of frames to remove from begining
+        during each iteration.
     n : int
-        number of trimming iterations
+        Number of trimming iterations.
     fps : float
         Frame rate of video in frames per second.
     freqmin : float
@@ -141,15 +146,15 @@ def get_spectra_periodogram_int_cycles(ts, step, n, fps, freqmin, freqmax, windo
     verbose : boolean
         Print progress statements when true.
     plot : boolean
-        Plots average spectrum of each iteration when true
+        Plots average spectrum of each iteration when true.
 
     Returns
     -------
     freq : 1d array 
         Frequency range (bins), bounded by freqmin and freqmax.
     pxx : array, (1d, 2d, or 3d)
-        Array containing the bin magnitudes for each of the input signals.
-        (for frequencies between freqmin and freqmax)
+        Array containing the bin magnitudes for each of the input signals
+        (for frequencies between freqmin and freqmax).
     '''
     freq_max = None
     pxx_max = None
@@ -192,95 +197,12 @@ def get_spectra_periodogram_int_cycles(ts, step, n, fps, freqmin, freqmax, windo
 
     return freq_max, pxx_max
 
-def get_spectrum_periodogram_int_cycles(ts, step, n, fps, freqmin, freqmax, window='boxcar', 
-                                        detrend='constant', verbose=False, plot=False):
-    
-    ''' 
-    Iteratively trims the input and computes the power spectral density using the periodogram.
-
-    Attempts to compute the power spectral density for an interger number of cycles by iteratively
-    trimming the input and computing the power spectral density with the periodogram (of length
-    equal to the trimmed input). Returns spectrum whose corresponding average spectrum's peak frequency
-    has the greatest magnitude.
-    
-    Parameters
-    ----------
-    ts : arraylike (1d, 2d, or 3d)
-        Time series with axis 0 equal to time axis.
-    step: int
-        Number of frames to remove from beginggin
-        during each iteration
-    n : int
-        number of trimming iterations
-    fps : float
-        Frame rate of video in frames per second.
-    freqmin : float
-        Lower bound for frequency thresholding in Hz.
-    freqmax : float
-        Upper bound for frequency thresholding in Hz.
-    Window : string
-        Window to apply to time series prior to fft.
-    detrend : string
-        See scipy.signal.periodogram for details.
-    verbose : boolean
-        Print progress statements when true.
-    plot : boolean
-        Plots average spectrum of each iteration when true
-
-    Returns
-    -------
-    freq : 1d array 
-        Frequency range (bins), bounded by freqmin and freqmax.
-    pxx : array, (1d, 2d, or 3d)
-        Array containing the bin magnitudes for each of the input signals.
-        (for frequencies between freqmin and freqmax)
-    '''
-    freq_max = None
-    pxx_max = None
-    mag_max = -1
-    i_max = 0
-
-    if verbose:
-        print('Iteratively computing spectrum for trimmed time series')
-        print(f'Step size: {step}')
-        print(f'Number of iteratoins: {n}')
-
-    for i in range(n):
-        if verbose:
-            print(f'i = {i}')
-
-        ts_trim = ts[i * step:]
-
-        freq, pxx = get_spectra_periodogram(ts, fps, freqmin, freqmax, nfft=len(ts_trim), 
-                                            window=window, detrend=detrend, verbose=False)
-        
-        idx, mag, prom = find_dominant_peak(pxx)
-
-        if verbose:
-            print(f'Peak Magnitude: {mag}')
-
-        if mag > mag_max:
-            mag_max = mag
-            pxx_max = pxx
-            freq_max = freq
-            i_max = i
-
-        if plot:
-            fig, axs = plt.subplots(2,1, figsize=(14,6))
-            plotting_utils.plot_timeseries(ts_trim, ax=axs[0])
-            plotting_utils.plot_spectrum(freq, pxx, peak_idx=idx, ax=axs[1])
-            plt.show()
-
-    if verbose:
-        print(f'Best spectrum when i = {i_max}')
-
-    return freq_max, pxx_max
-
 def get_spectra_welch(ts, 
                       fs, 
                       freqmin, 
                       freqmax, 
-                      nperseg=4096, 
+                      nperseg=4096,
+                      nfft=None, 
                       window='boxcar', 
                       detrend='constant',
                       noverlap=None,
@@ -290,7 +212,7 @@ def get_spectra_welch(ts,
 
     Parameters
     ----------
-     ts : arraylike (1d, 2d, or 3d)
+    ts : array-like, (1d, 2d, or 3d)
         Time series with axis 0 equal to time axis.
     fps : float
         Frame rate of video in frames per second.
@@ -309,16 +231,16 @@ def get_spectra_welch(ts,
 
     Returns
     -------
-    freq : 1d array 
+    freq : array, 1d
         Frequency range (bins), bounded by freqmin and freqmax.
     pxx : array, (1d, 2d, or 3d)
-        Array containing the bin magnitudes for each of the input signals.
-        (for frequencies between freqmin and freqmax)
+        Array containing the bin magnitudes for each of the input signals 
+        (for frequencies between freqmin and freqmax).
     '''
     if verbose:
         print('Computing pixel spectra')
     
-    freq, pxx = scipy.signal.welch(ts, fs=fs, window=window, nperseg=nperseg, detrend=detrend, noverlap=noverlap, axis=0)
+    freq, pxx = scipy.signal.welch(ts, fs=fs, window=window, nperseg=nperseg, nfft=nfft, detrend=detrend, noverlap=noverlap, axis=0)
     
     if verbose:
         print('Finished computing spectra')
@@ -331,117 +253,26 @@ def get_spectra_welch(ts,
     
     return freq, pxx
 
-def ar_psd(signal, nfft, low, high, order=None):
-    '''
-    Estimates power spectral density (PSD) using autoregressive approach.
-
-    Uses the Burg method. Helper function for get_spectra_ar.
-
-    Parameters
-    ----------
-    signal : 1D array
-        Input signal
-    nfft : int
-        Size of underlying FFt
-    low : int
-        Lower bound of resultant PSD
-    high : int
-        Upper bound of resultant PSD
-    order : int
-        Order of autoregressive model.
-        When None (default), chooses order that minimizes
-        the AIC
-
-    Returns
-    -------
-    psd : array
-        Spectrum power magnitudes
-    '''
-    x = scipy.signal.detrend(signal)
-
-    if order is None:
-        orders = np.arange(1, 100)
-        rhos = [spectrum.arburg(signal, i)[1] for i in orders]
-        aics = spectrum.AIC(len(signal), rhos, orders)
-        order = np.argmin(aics)
-        print(order)
-
-    ar, variance, coeff_reflection = spectrum.arburg(x, order)
-    PSD = spectrum.arma2psd(ar, NFFT=nfft, sides='centerdc')
-    start = nfft // 2 - 1
-    
-    psd = PSD[start:]    
-    psd = psd[low:high]
-    return psd
-
-def get_spectra_ar(ts, fs, freqmin, freqmax, nfft=None, order=None, verbose=True):
-    '''
-    Estimates power spectral density (PSD) using autoregressive approach for each input signal.
-
-    Uses Burg's method.
-
-    Parameters
-    ----------
-    ts : arraylike (1D, 2D, 3D)
-        Time series with axis 0 equal to time axis.
-    fs : float
-        Sampling rate in Hz.
-    freqmin : int
-        Lower bound of resultant PSD
-    freqmax : int
-        Upper bound of resultant PSD
-    nfft : int
-        Size of underlying FFT
-    order : int
-        Order of autoregressive model.
-        When None (default), chooses order that minimizes
-        the AIC
-
-    Returns
-    -------
-    freq : 1d array 
-        Frequency range (bins), bounded by freqmin and freqmax.
-    psd : array, (1d, 2d, or 3d)
-        Array containing the bin magnitudes for each of the input signals.
-        (for frequencies between freqmin and freqmax)
-    '''
-    if verbose:
-        print('Computing pixel spectra')
-    
-    if nfft is None:
-        nfft = get_next_pow2(ts.shape[0])
-    
-    freq = scipy.fft.rfftfreq(nfft * 2, 1/fs)
-    low = np.where(freq > freqmin)[0][0]
-    high = np.where(freq > freqmax)[0][0]
-    freq = freq[low:high]
-    
-    psd = np.apply_along_axis(ar_psd, 0, ts, nfft * 2, low, high, order=order)
-    if (verbose):
-        print('Finished computing spectra')
-    return freq, psd
-
-
 def get_dom_freq_max_power(freq, pxx):
     '''
-    Returns array containing the frequencies with the greatest power for each input signal
+    Returns array containing the frequencies with the greatest power for each input signal.
     
     Parameters
     ----------
-    freq  : 1d array
+    freq  : array, 1d
         Spectrum frequencies.
     pxx : 1d, 2d, or 3d array
-        Power magnitudes for spectrum of each input signal
+        Power magnitudes for spectrum of each input signal.
 
     Returns
     -------
-    freq_max_power : array
-        Frequencies with the max power for each input signal
+    freq_max_power : array, 1d smaller than input
+        Frequencies with the max power for each input signal.
     power : array 
-        Power corresponding to each frequency in freq_max_power
+        Power corresponding to each frequency in freq_max_power.
     _ : None
         Empty variable added so that the function has three return values
-        and can be substitude anywhere get_dom_freq_peak_finder is used
+        and can be substitude anywhere get_dom_freq_peak_finder is used.
     '''
     max_power_idx = np.argmax(pxx, axis=0)
     power = np.max(pxx, axis=0)
@@ -450,26 +281,26 @@ def get_dom_freq_max_power(freq, pxx):
 
 def find_dominant_peak(x, criteria='magnitude'):
     ''' 
-    Returns index and prominence of most dominant peak 
+    Returns index and prominence of most dominant peak. 
 
     Choose dominant peak based on selection criteria: either the peak with the greatest
-    magnitude or the greatest prominence
+    magnitude or the greatest prominence.
 
     Parameters
     ----------
     x : array
         Input signal.
     criteria : string
-        Selection criteria: either 'magnitude' or 'prominence'
+        Selection criteria: either 'magnitude' or 'prominence'.
 
     Returns
     -------
     dom_peak_idx: int
         Index of peak.
     magnitude : float
-        Magnitude of dominant peak
+        Magnitude of dominant peak.
     prominence  : float
-        Prominence of dominant peak
+        Prominence of dominant peak.
     '''
     if criteria != 'magnitude' and criteria != 'prominence':
         print("Invalid filter parameter given. Should be either 'magnitude' or 'prominence'")
@@ -496,7 +327,7 @@ def find_dominant_peak(x, criteria='magnitude'):
 
 def get_dom_freq_peak_finder(freq, pxx, criteria='magnitude'):
     ''' 
-    Finds dominant frequency in each spectrum and returns index of peak and corresponding prominence
+    Finds dominant frequency in each spectrum and returns index of peak and corresponding prominence.
 
     For each spectrum, finds the dominant frequency based on the given criteria. When 'magnitude' is passed,
     the peak with the greatest magnitude will be selected. When 'prominence' is passed, the peak with the greatest
@@ -507,18 +338,18 @@ def get_dom_freq_peak_finder(freq, pxx, criteria='magnitude'):
     freq : 1d array
         Spectrum frequencies.
     pxx : 1d, 2d, or 3d array 
-        Power magnitudes for each vibration signal spectrum
+        Power magnitudes for each vibration signal spectrum.
     criteria : string
-        Either 'magnitude' or 'prominence'
+        Either 'magnitude' or 'prominence'.
 
     Returns
     -------
     dom_freq : array dimension = dim(pxx) - 1
-        The dominant frequency for each spectrum in the input
-    magnitudes : array with same shape as dom_freq
-        Magnitude of each peak
-    prominences : array with same shape as dom_freq
-        Prominence of each peak
+        The dominant frequency for each spectrum in the input.
+    magnitudes : array, same shape as dom_freq
+        Magnitude of each peak.
+    prominences : array, same shape as dom_freq
+        Prominence of each peak.
     '''
     # find indices of most prominent peaks
     peak_idxs, magnitudes, prominences = np.apply_along_axis(find_dominant_peak, 0, pxx, criteria)
@@ -541,11 +372,11 @@ def save_spectra(prefix, freq, pxx):
     Parameters
     ----------
     prefix : string
-        Path to the directory where the files should be stored
+        Path to the directory where the files should be stored.
     freq : array
-        Spectra frequencies
+        Spectra frequencies.
     pxx : array
-        Spectra magnitudes
+        Spectra magnitudes.
     '''
     freq_path = os.path.join(prefix, 'freq')
     pxx_path = os.path.join(prefix, 'pxx')
@@ -554,14 +385,14 @@ def save_spectra(prefix, freq, pxx):
 
 def save_dom_freq(prefix, dom_freq):
     '''
-    Saves array storing dominant frequency for each vibration signal
+    Saves array storing dominant frequency for each vibration signal.
 
     Parameters
     ----------
     prefix : string
-        Path to the directory where the files should be stored
+        Path to the directory where the files should be stored.
     dom_freq : array
-        Dominant frequency for each vibration signal
+        Dominant frequency for each vibration signal.
     '''
     dom_freq_path = os.path.join(prefix, 'dom_freq')
     np.save(dom_freq_path, dom_freq)
@@ -573,14 +404,14 @@ def load_spectra(prefix):
     Parameters
     ----------
     prefix : string
-        Path to the directory where the files are stored
+        Path to the directory where the files are stored.
     
     Returns
     -------
     freq : array
-        Spectra frequencies
+        Spectra frequencies.
     pxx : array
-        Spectra magnitudes
+        Spectra magnitudes.
     '''
     freq = np.load(os.path.join(prefix, 'freq'))
     pxx = np.load(os.path.join(prefix, 'pxx'))
@@ -593,12 +424,12 @@ def load_dom_freq(prefix):
     Parameters
     ----------
     prefix : string
-        Path to the directory where the files are stored
+        Path to the directory where the files are stored.
 
     Returns
     -------
     dom_freq : array
-        Dominant frequency for each vibration signal
+        Dominant frequency for each vibration signal.
     '''
     dom_freq = np.load(os.path.join(prefix, 'dom_freq'))
     return dom_freq
