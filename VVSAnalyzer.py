@@ -1,3 +1,5 @@
+'''Class for analyzing the frequency contrent of videos using the Virtual Vision Sensor'''
+
 import numpy as np
 import numpy.ma as ma
 import pandas as pd
@@ -12,8 +14,25 @@ import plotting_utils
 class VVSAnalyzer:
 
     def __init__(self, vid_path, roi, config_path=None):
+        '''
+        Constructs a VVSAnalyzer object for the given video and ROI.
+
+        Parameters
+        ----------
+        vid_path : string
+            Path to the video of interest.
+        roi : listlike
+            Region of interest to process (ymin, ymax, xmin, xmax).
+        config_path : string
+            Path to .json file storing processing parameters.
+
+        Returns
+        -------
+        None
+        '''
         if config_path is not None:
             # load saved processing context
+            # TODO
             pass
         self.path = vid_path
         self.roi = roi
@@ -21,6 +40,23 @@ class VVSAnalyzer:
     
     def vid2vib(self, vid2vib_kwargs):
         '''
+        Generate vibration signals using the VVS video to vibration translation.
+
+        Parameters
+        ----------
+        vid2vib_kwargs : dictionary
+            Keyword arguments for vid2vib_utils.uncompressed_vid. 
+                reduction : string
+                    Reduction method (either "gray" for grayscale or "r", "g", or "b" for a particular color channel).
+                verbose : boolean
+                    Prints progress statements when true.
+
+        Returns
+        -------
+        vib : 3d array
+            Uncompressed video with reduction applied.
+        fps : float
+            Video framerate.
         '''
         self.vid2vib_kwargs = vid2vib_kwargs
         
@@ -33,6 +69,29 @@ class VVSAnalyzer:
 
     def compute_spectra(self, freqmin, freqmax, spectra_func, spectra_func_kwargs):
         '''
+        Computes vibration power spectra for each vibration signal.
+
+        Trims the resultant spectra to a range of plausible frequencies between
+        freqmin and freqmax.
+
+        Parameters
+        ----------
+        freqmin : float
+            Lower bound for frequency thresholding in Hz.
+        freqmax : float
+            Upper bound for frequency thresholding in Hz.
+        spectra_func : function
+            Function from spectra_utils (or custom) for computing spectra.
+        spectra_func_kwargs : dictionary
+            Keyword arguments for spectra_func.
+
+        Returns
+        -------
+        freq : array, 1d
+            Frequency range (bins), bounded by freqmin and freqmax.
+        pxx : array, (1d, 2d, or 3d)
+            Array containing the bin magnitudes for each of the input signals 
+            (for frequencies between freqmin and freqmax).
         '''
         self.freqmin = freqmin
         self.freqmax = freqmax
@@ -45,6 +104,44 @@ class VVSAnalyzer:
 
     def aggregate(self, dom_freq_func, dom_freq_func_kwargs, masks):
         '''
+        Aggregates and optionally masks the vibration signals using a user-provided function.
+
+        Returns masked output for each provided mask.
+        Masks are defined using a dictionary 
+        {'name' : <string>, 'weight' : <string>, 'kwargs' : {'stat_reduc':<tring>, 'threshold' : <float>, 'percentile' : <float>}}
+
+        name : string
+            Name of the mask.
+        weight : string
+            Variable used for create mask. Either 'prominence' or 'magnitude'.
+        kwargs : dictionary
+            Keyword arguments for the dom_freq_function.
+
+        Parameters
+        ----------
+        dom_freq_func : function
+            Function from aggregate_utils for aggregating vibration spectra.
+        dom_freq_func_kwargs : 
+            Keyword arguments for dom_freq_func
+        masks : list of dictionaries
+            Masks to apply to the output.
+
+        Returns
+        -------
+        agg_df : Pandas.DataFrame
+            Dataframe storing extracted frequencies for the unmasked data and each mask.
+        pxx_avg : 1d array
+            Average power spectrum magnitude.
+        pxx_avg_peak_idx : int
+            Index of the peak frequency of pxx_avg.
+        dom_freq : 2d array
+            Unmasked frequency heat map (pixel wise peak frequency).
+        masked : list of np.ma.MaskedArray
+            Masked frequency heat map (pixel wise peak frequency).
+        masked_avg_spectrums : list of 1d arrays
+            Average power spectrum magnitude corresponding to each mask.
+        masked_avg_spectrums_peak_idxs
+            Index of the peak frequency of pxx_avg for each mask.
         '''
         # save processing parameter choices
         self.dom_freq_func = dom_freq_func
@@ -106,8 +203,18 @@ class VVSAnalyzer:
 
     def report(self, figsize=None):
         '''
-        '''
+        Plots the frame and ROI, frequency heatmaps, and average spectra and heatmap histograms.
 
+        Parameters
+        ----------
+        figsize : tuple
+            Size of the figure in inches. Defaults to matplotlib default.
+
+        Returns
+        -------
+        agg_df : Pandas.DataFrame
+            Dataframe storing extracted frequencies for the unmasked data and each mask.
+        '''
         # Plot frame with ROI
         ax = plotting_utils.plot_frame(self.path, title='Camera FOV and ROIs', figsize=figsize)
         plotting_utils.plot_rois(ax, [self.roi])
@@ -122,7 +229,7 @@ class VVSAnalyzer:
                                             edgecolor='Fuchsia', 
                                             colorbar=True, 
                                             colorbarlabel='Brightness', 
-                                            no_ticks=True)
+                                            ticks=False)
         
         plotting_utils.plot_image(self.dom_freq,
                                   low=self.freqmin, 
@@ -132,7 +239,7 @@ class VVSAnalyzer:
                                   cmap='magma', 
                                   colorbar=True, 
                                   colorbarlabel='Hz',
-                                  no_ticks=True)
+                                  ticks=False)
         
         for i, mask in enumerate(self.masks):
             name = mask['name']
@@ -144,7 +251,7 @@ class VVSAnalyzer:
                                       cmap='magma', 
                                       colorbar=True, 
                                       colorbarlabel='Hz',
-                                      no_ticks=True) 
+                                      ticks=False) 
         plt.subplots_adjust(wspace=0.5)
 
         # Plot average spectra and histograms for unmasked and masked
@@ -168,7 +275,7 @@ class VVSAnalyzer:
         for ax, col in zip(axs[0], cols):
             ax.set_title(col)
         
-        # save figures
+        # keep track of figures
         fig_nums = plt.get_fignums()
         self.figs = [plt.figure(n) for n in fig_nums]
         
@@ -180,6 +287,20 @@ class VVSAnalyzer:
 
     def save(self, out_prefix):
         '''
+        Save important variables and the processing context.
+
+        Creates files with the given directory.
+
+        Saves:
+        * Vibration power spectra
+        * Aggregated frequency data
+        * Plots
+        * Processing variables
+
+        Parameters
+        ----------
+        out_prefix : string
+            Path to a directory to save all files.
         '''
         ### make output directory and subdirectory
         if not os.path.exists(out_prefix):
@@ -229,7 +350,42 @@ class VVSAnalyzer:
                 dom_freq_func_kwargs, 
                 masks,
                 figsize):
+        '''
+        Complete processing pipeline for analyzing the sway of a ROI in a video.
 
+        Generates vibration signals from a video using VVS, computes power spectra for each
+        vibration signal (pixel), aggregates the power spectra, and reports/plots the results.
+
+        Parameters
+        ----------
+        vid2vib_kwargs : dictionary
+            Keyword arguments for vid2vib_utils.uncompressed_vid. 
+                reduction : string
+                    Reduction method (either "gray" for grayscale or "r", "g", or "b" for a particular color channel).
+                verbose : boolean
+                    Prints progress statements when true.
+        freqmin : float
+            Lower bound for frequency thresholding in Hz.
+        freqmax : float
+            Upper bound for frequency thresholding in Hz.
+        spectra_func : function
+            Function from spectra_utils (or custom) for computing spectra.
+        spectra_func_kwargs : dictionary
+            Keyword arguments for spectra_func.
+        dom_freq_func : function
+            Function from aggregate_utils for aggregating vibration spectra.
+        dom_freq_func_kwargs : 
+            Keyword arguments for dom_freq_func
+        masks : list of dictionaries
+            Masks to apply to the output.
+        figsize : tuple
+            Size of the figure in inches. Defaults to matplotlib default.
+
+        Returns
+        -------
+        agg_df : Pandas.DataFrame
+            Dataframe storing extracted frequencies for the unmasked data and each mask.
+        '''
         self.vid2vib(vid2vib_kwargs)
         self.compute_spectra(freqmin, freqmax, spectra_func, spectra_func_kwargs)
         self.aggregate(dom_freq_func, dom_freq_func_kwargs, masks)

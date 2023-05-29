@@ -17,12 +17,12 @@ def average_spectra(pxx):
     Parameters
     ----------
     pxx : 1d, 2d, or 3d array 
-        Spectra magnitudes (axis zero is the frequency bin axis)
+        Spectra magnitudes (axis zero is the frequency bin axis).
 
     Returns
     -------
     pxx_avg : 1d array
-        Binwise average of pxx
+        Binwise average of pxx.
     '''
     # average over positional dimension (first axis assumed to be frequency dimension)
     ax = tuple(np.arange(1, len(pxx.shape)))
@@ -30,24 +30,28 @@ def average_spectra(pxx):
 
 def hist_spectrum(dom_freq, freq, masked=True):
     '''
-    Creates histogram for dominant frequency array.
+    Creates histogram for the dominant frequency array.
+
+    When freq is equal to the bins of the associated spectum, the edge of each bin corresponds 
+    with a frquency in the spectrum such that each histogram bin counts the multiplicity of 
+    one spectrum frequency.
 
     Parameters
     ----------
-    dom_freq : array
-        Dominat frequency of each vibration signal
-    freq : array
-        Bins to be used for histogram (in most cases frequency
-        bins of underlying spectra)
+    dom_freq : 1d or 2d array
+        Dominat frequency of each vibration signal.
+    freq : 1d array
+        Bins to be used for histogram (in most cases frequency.
+        bins of underlying spectra).
     masked : boolean
-        True when dom_freq has been masked
+        True when dom_freq has been masked.
 
     Returns
     -------
     count : array
-        count associated with each histogram bin
+        Count associated with each histogram bin.
     bins : array
-        histogram bins
+        Histogram bins.
     '''
     data = dom_freq.compressed().ravel() if masked else dom_freq.ravel()
     freq = np.append(freq, freq[-1] + (freq[1] - freq[0]))
@@ -56,7 +60,7 @@ def hist_spectrum(dom_freq, freq, masked=True):
 
 def mask_dom_freq(dom_freq, weight, threshold=None, stat_reduc='median', nstd=1, percentile=75):
     ''' 
-    Masks dominant frequency array uisng provided weight and either a threshold or statisitical reduction
+    Masks dominant frequency array uisng the provided weights and either a threshold or statisitical reduction.
 
     When a threshold is provided, masks values in dom_freq  whose corresponding weight is less than the threshold.
     When no threshold is provided, masks values in dom_freq whose corresponding weight is less than value obtained by
@@ -66,22 +70,22 @@ def mask_dom_freq(dom_freq, weight, threshold=None, stat_reduc='median', nstd=1,
     Parameters
     ----------
     dom_freq : 1d or 2d array
-        Dominant frequency for each vibration signal
+        Dominant frequency for each vibration signal.
     weight : 1d or 2d array (same shape as dom_freq),
-        Weight for each dominant frequency (typically power or prominence)
+        Weight for each dominant frequency (typically power or prominence).
     threshold :  float
-        Custom masking threshold, optional. When provided stat_reduc is ignored
+        Custom masking threshold, optional. When provided stat_reduc is ignored.
     stat_reduc : string
-        Reduction applied to weight to obtain masking threshold
+        Reduction applied to weight to obtain masking threshold.
     nstd : int
-        number of standard deviations to add to mean when masking with mean
+        Number of standard deviations to add to mean when masking with mean.
     percentile :  int in (0, 100)
-        percentile of data to estimate (when stat_reduc = 'percentile')
+        Percentile of data to estimate (when stat_reduc = 'percentile').
         
     Returns
     -------
     dom_freq_masked : masked array with same shape as dom_freq
-        Masked dominant frequencies
+        Masked dominant frequencies.
     '''
     mask = None
 
@@ -103,7 +107,7 @@ def mask_dom_freq(dom_freq, weight, threshold=None, stat_reduc='median', nstd=1,
 
 def masked_mode(masked):
     '''
-    Returns the mode of a masked array
+    Returns the mode of a masked array.
     
     Parameters
     ----------
@@ -112,13 +116,13 @@ def masked_mode(masked):
     Returns
     -------
     mode : float
-        mode of masked array
+        Mode of masked array.
     '''
     return scipy.stats.mode(ma.filled(masked, np.NaN).ravel(), nan_policy='omit')[0][0]
 
 def mode(unmasked):
     '''
-    Returns the mode of a unmasked numpy array
+    Returns the mode of a unmasked numpy array.
     
     Parameters
     ----------
@@ -127,6 +131,6 @@ def mode(unmasked):
     Returns
     -------
     mode : float
-        mode of unmasked array
+        Mode of unmasked array.
     '''
     return scipy.stats.mode(unmasked.ravel())[0][0]

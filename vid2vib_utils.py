@@ -5,6 +5,7 @@ import numpy as np
 import sys
 import datetime
 import ffmpeg
+
 import VideoReader
 
 CHANNEL_MIN = 0  # mininum brightness of channel
@@ -36,7 +37,7 @@ def get_video_datetime(path):
 
     Returns start time of the video in video local time.
     
-    Written by Austin
+    Shared by Sidney Bush.
     
     Parameters
     ----------
@@ -173,7 +174,7 @@ def mbt(path, roi, reduction='gray', nlevels=8, verbose=True):
         print('Reading roi into array')
     
 
-    vid_roi, fps = uncompressed_vid(path, roi, reduction=reduction, verbose=True, edge=False)
+    vid_roi, fps = uncompressed_vid(path, roi, reduction=reduction, verbose=True)
 
     if (verbose):
         print('Done reading roi into array')

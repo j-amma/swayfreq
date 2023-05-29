@@ -1,4 +1,8 @@
-'''Class for reading videos into arrays using FFMPEG'''
+'''Class for reading videos into arrays using FFMPEG
+   
+   Written by Ethan Gutmann (National Center for Atmoshperic Research)
+   and shared under a MIT Licesnce.
+'''
 
 import numpy as np
 import subprocess as sp

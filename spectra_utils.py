@@ -47,7 +47,7 @@ def normalize(f, dx):
     '''
     return f / np.trapz(f, dx=dx)
         
-def get_spectra_periodogram(ts, fps, freqmin, freqmax, nfft=None, window='boxcar', detrend='constant', verbose=True):
+def get_spectra_periodogram(ts, fs, freqmin, freqmax, nfft=None, window='boxcar', detrend='constant', verbose=True):
     ''' 
     Computes power spectral density for each vibration signal using periodogram.
 
@@ -58,8 +58,9 @@ def get_spectra_periodogram(ts, fps, freqmin, freqmax, nfft=None, window='boxcar
     ----------
     ts : arraylike (1d, 2d, or 3d)
         Time series with axis 0 equal to time axis.
-    fps : float
-        Frame rate of video in frames per second.
+    fs : float
+        Sampling frequency in Hz.
+        (Frame rate of video in frames per second).
     freqmin : float
         Lower bound for frequency thresholding in Hz.
     freqmax : float
@@ -89,7 +90,7 @@ def get_spectra_periodogram(ts, fps, freqmin, freqmax, nfft=None, window='boxcar
         nfft = 8 * get_next_pow2(ts.shape[0])
     
     freq, pxx = scipy.signal.periodogram(ts, 
-                                         fps, 
+                                         fs, 
                                          window=window, 
                                          nfft=nfft,
                                          detrend=detrend, 
@@ -108,7 +109,7 @@ def get_spectra_periodogram(ts, fps, freqmin, freqmax, nfft=None, window='boxcar
 def get_spectra_periodogram_int_cycles(ts, 
                                        step, 
                                        n, 
-                                       fps, 
+                                       fs, 
                                        freqmin, 
                                        freqmax, 
                                        window='boxcar', 
@@ -133,8 +134,9 @@ def get_spectra_periodogram_int_cycles(ts,
         during each iteration.
     n : int
         Number of trimming iterations.
-    fps : float
-        Frame rate of video in frames per second.
+    fs : float
+        Sampling frequency in Hz.
+        (Frame rate of video in frames per second).
     freqmin : float
         Lower bound for frequency thresholding in Hz.
     freqmax : float
@@ -172,7 +174,7 @@ def get_spectra_periodogram_int_cycles(ts,
 
         ts_trim = ts[i * step:]
 
-        freq, pxx = get_spectra_periodogram(ts, fps, freqmin, freqmax, nfft=len(ts_trim), 
+        freq, pxx = get_spectra_periodogram(ts, fs, freqmin, freqmax, nfft=len(ts_trim), 
                                             window=window, detrend=detrend, verbose=False)
 
         pxx_avg = aggregate_utils.average_spectra(pxx)
@@ -214,8 +216,9 @@ def get_spectra_welch(ts,
     ----------
     ts : array-like, (1d, 2d, or 3d)
         Time series with axis 0 equal to time axis.
-    fps : float
-        Frame rate of video in frames per second.
+    fs : float
+        Sampling frequency in Hz.
+        (Frame rate of video in frames per second).
     freqmin : float
         Lower bound for frequency thresholding in Hz.
     freqmax : float
