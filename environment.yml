@@ -1,13 +1,4 @@
-name: swayfreq
+name: treesway_manuscript
 channels:
-  - conda-forge
   - defaults
-dependencies:
-  - numpy
-  - scipy
-  - pandas
-  - ffmpeg
-  - matplotlib
-  - spectrum
-  - opencv
-  - notebook
+prefix: /Users/jamma/opt/miniconda3/envs/treesway_manuscript
