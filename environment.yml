@@ -5,9 +5,9 @@ channels:
 dependencies:
   - numpy
   - pandas
+  - matplotlib
   - scipy
   - ffmpeg
   - ffmpeg-python
-  - opencv-python
+  - opencv
   - notebook
-  - matplotlib
