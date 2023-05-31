@@ -1,5 +1,7 @@
 # swayfreq - a toolkit for measuring the sway frequency of a vibrating object using video data
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/j-amma/swayfreq/HEAD)
+
 ## Introduction
 This toolkit enables one to measure the sway frequency of a vibrating object from video data. The code was developed for measuring the sway frequency of trees, which can be used to infer other properties of the trees, over greater spatial extents. However, the code generalizes nicely to other applications. 
 
