@@ -1,7 +1,6 @@
 name: swayfreq
 channels:
   - conda-forge
-  - fastai
   - defaults
 dependencies:
   - numpy
@@ -9,6 +8,6 @@ dependencies:
   - scipy
   - ffmpeg
   - ffmpeg-python
-  - opencv-python-headless
+  - opencv-python
   - notebook
   - matplotlib
