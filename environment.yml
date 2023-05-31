@@ -8,6 +8,6 @@ dependencies:
   - scipy
   - ffmpeg
   - ffmpeg-python
-  - opencv
+  - opencv-python-headless
   - notebook
   - matplotlib
