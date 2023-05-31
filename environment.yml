@@ -10,3 +10,4 @@ dependencies:
   - ffmpeg-python
   - opencv
   - notebook
+  - matplotlib
