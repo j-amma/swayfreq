@@ -1,4 +1,4 @@
-name: swayfreq_test
+name: swayfreq
 channels:
   - conda-forge
   - defaults
