@@ -36,7 +36,7 @@ Several sample notebooks used to facilitate analysis for an accompanying manuscr
 The VVSAnalyzer and MBTAnalyzer objects provide a convenient interfce for invoking the video processing algorithms. After first defining key parameters, the user can create a MBT analyzer object and step through each of the video processing pipeline (to examine intermediate output) or call `analyze()` to run the entire pipeline (see trout_manuscript.ipynb for example).
 
 ### Memory burden
-Working with uncompressed video data often requires a large amount of RAM. Consider working with small regions of interest (ROIs). 
+Working with uncompressed video data often requires a large amount of RAM. Consider working with small regions of interest (ROIs) or on a machine with a suitable amount of RAM. See the hpc directory for example scripts used to process the entire frame on a HPC. 
 
 ## Video processing pipeline
 The logic for both video processing algorithms has been abstracted into a modular pipeline with 4 abstract steps:
