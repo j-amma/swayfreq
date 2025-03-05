@@ -1,4 +1,4 @@
-name: swayfreq
+name: swayfreq_test
 channels:
   - conda-forge
   - defaults
@@ -10,4 +10,5 @@ dependencies:
   - ffmpeg
   - ffmpeg-python
   - opencv
-  - notebook
+  - xarray
+  - jinja

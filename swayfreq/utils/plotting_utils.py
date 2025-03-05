@@ -76,9 +76,8 @@ def plot_image(image,
         plt.colorbar(im, cax=cax, label=colorbarlabel)
         clb = plt.colorbar(im, cax=cax, label=colorbarlabel)
         if gscale_image:
-            ticks = clb.get_ticks()
-            ticks[-1] = vid2vib_utils.CHANNEL_MAX
-            clb.set_ticks(ticks)
+            clb.ax.set_yticks([0, 50, 100, 150, 200, 255])
+            clb.ax.set_yticklabels(['0', '50', '100', '150', '200', '255'])
 
     if edgecolor is not None:
         for axis in ['top','bottom','left','right']:

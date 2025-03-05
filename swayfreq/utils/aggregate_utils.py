@@ -118,7 +118,7 @@ def masked_mode(masked):
     mode : float
         Mode of masked array.
     '''
-    return scipy.stats.mode(ma.filled(masked, np.NaN).ravel(), nan_policy='omit')[0][0]
+    return scipy.stats.mode(ma.filled(masked, np.nan).ravel(), nan_policy='omit')
 
 def mode(unmasked):
     '''
@@ -133,4 +133,4 @@ def mode(unmasked):
     mode : float
         Mode of unmasked array.
     '''
-    return scipy.stats.mode(unmasked.ravel())[0][0]
+    return scipy.stats.mode(unmasked.ravel())
