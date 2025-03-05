@@ -28,8 +28,8 @@ A video processing pipeline has been developed so that users may can simply choo
 ### Sample notebooks
 Several sample notebooks used to facilitate analysis for an accompanying manuscript have been included.
 - manitou_manuscript.ipynb - a notebook that analyzes the sway of two trees in a stand of trees at the Manitou Experimental Forest, CO using VVS and accelerometer data.
-- niwotridge_manuscript - a notebook that analyzes the sway of a fir tree in Niwot Ridge, CO using VVS, MBT, and accelerometer data.
-- snoqualmie_manuscript - a notebook that illustrates using the video processing to investigate a snow unloading event.
+- niwotridge_manuscript.ipynb - a notebook that analyzes the sway of a fir tree in Niwot Ridge, CO using VVS, MBT, and accelerometer data.
+- snoqualmie_manuscript.ipynb - a notebook that illustrates using the video processing to investigate a snow unloading event.
 - troutlake_manuscript.ipynb - a notebook that analyzes the sway of a tree in Trout Lake, Wisconsin using both VVS, MBT, and accelerometer data
 
 ### Analyzer objects
