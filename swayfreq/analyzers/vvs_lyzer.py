@@ -198,7 +198,7 @@ class VVSAnalyzer:
             values = values + masked_values[i]
         
         agg_dict = {key:value for key, value in zip(labels, values)}
-        self.agg_df = pd.DataFrame(agg_dict, index=[0])
+        self.agg_df = pd.DataFrame(agg_dict, index=[0,1])
 
         return self.agg_df, self.pxx_avg, self.pxx_avg_peak_idx, self.dom_freq, self.masked, self.masked_avg_spectrums, self.masked_avg_spectrums_peak_idxs
 
