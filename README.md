@@ -10,14 +10,27 @@ A video processing pipeline has been developed so that users may can simply choo
 
 ## How to get started
 ### Running the code
-1. Create a conda environment with the provided 'environment.yml' file. The pipeline uses a relatively standard scientific computing stack but additionally invokes opencv and ffmpeg.
-2. Clone the repo.
-3. Experiment with an existing notebook or implement your own.
+1. Create and activagte an environment with the provided 'environment.yml' file. The pipeline uses a relatively standard scientific computing stack but additionally invokes opencv and ffmpeg. For example, for a conda environment:
+   ```
+   conda env create -f environment.yml
+   ```
+   and
+   ```
+   conda activate swayfreq
+   ```
+3. Clone the repo.
+4. Install the package in developer mode after cd'ing to the newly cloned directory
+   ```
+   pip install . -e
+   ```
+6. Experiment with an existing notebook or implement your own.
 
 ### Sample notebooks
-Several sample notebooks have been included.
-- trout_manuscript.ipynb - a notebook that analyzes the sway of a tree in Trout Lake, Wisconsin using both VVS, MBT, and accelerometer data
+Several sample notebooks used to facilitate analysis for an accompanying manuscript have been included.
 - manitou_manuscript.ipynb - a notebook that analyzes the sway of two trees in a stand of trees at the Manitou Experimental Forest, CO using VVS and accelerometer data.
+- niwotridge_manuscript - a notebook that analyzes the sway of a fir tree in Niwot Ridge, CO using VVS, MBT, and accelerometer data.
+- snoqualmie_manuscript - a notebook that illustrates using the video processing to investigate a snow unloading event.
+- troutlake_manuscript.ipynb - a notebook that analyzes the sway of a tree in Trout Lake, Wisconsin using both VVS, MBT, and accelerometer data
 
 ### Analyzer objects
 The VVSAnalyzer and MBTAnalyzer objects provide a convenient interfce for invoking the video processing algorithms. After first defining key parameters, the user can create a MBT analyzer object and step through each of the video processing pipeline (to examine intermediate output) or call `analyze()` to run the entire pipeline (see trout_manuscript.ipynb for example).
