@@ -1,0 +1,11 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "swayfreq"
+version = "2.0.0"
+description = 'Measure the frequency of a vibrating object using video data.',
+urls = 'https://github.com/j-amma/swayfreq'
+authors = 'Joe Ammatelli'
+license = 'MIT'
